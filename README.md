@@ -31,7 +31,7 @@ This project will ingest raw NYC 311 service request data, load it into PostgreS
 
 ## Status
 
-Project scaffold created. Bronze ingestion, silver cleaning, dimensions, and the service request fact table are implemented. A 50,000-row working sample is expected at:
+Project scaffold created. Bronze ingestion, silver cleaning, dimensions, fact table, and gold reporting tables are implemented. A 50,000-row working sample is expected at:
 
 ```text
 data/raw/nyc_311_sample.csv
@@ -68,6 +68,12 @@ psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/03_create_dimensions.sql
 psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/04_create_fact_table.sql
 ```
 
+7. Build gold reporting tables:
+
+```bash
+psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/05_create_gold_tables.sql
+```
+
 ## Current Validation Snapshot
 
 The initial 50,000-row sample produced:
@@ -85,3 +91,15 @@ The initial 50,000-row sample produced:
 - Complaint combinations in dimension: 1,115
 - Fact rows: 50,000
 - Unmatched fact rows: 0
+- Monthly borough summary rows: 6
+- Agency performance rows: 15
+- Complaint trend rows: 150
+- Data quality score: 98.67
+
+## Initial Business Findings
+
+- Top complaint type: Noise - Residential, with 6,528 requests
+- Highest-volume borough: Brooklyn, with 15,742 requests
+- Highest average closure time: Department of Health and Mental Hygiene, at 12,070.94 hours
+- Records with missing/unspecified borough: 330
+- Records with invalid close dates: 337
