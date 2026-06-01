@@ -31,7 +31,7 @@ This project will ingest raw NYC 311 service request data, load it into PostgreS
 
 ## Status
 
-Project scaffold created. Bronze ingestion and silver cleaning are implemented. A 50,000-row working sample is expected at:
+Project scaffold created. Bronze ingestion, silver cleaning, dimensions, and the service request fact table are implemented. A 50,000-row working sample is expected at:
 
 ```text
 data/raw/nyc_311_sample.csv
@@ -61,6 +61,13 @@ python src/extract_load_raw.py --csv data/raw/nyc_311_sample.csv --truncate
 psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/02_clean_silver.sql
 ```
 
+6. Build dimensions and fact table:
+
+```bash
+psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/03_create_dimensions.sql
+psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/04_create_fact_table.sql
+```
+
 ## Current Validation Snapshot
 
 The initial 50,000-row sample produced:
@@ -73,3 +80,8 @@ The initial 50,000-row sample produced:
 - Rows with data quality issues: 667
 - Invalid close dates: 337
 - Missing/unspecified boroughs: 330
+- Agencies in dimension: 15
+- Locations in dimension: 400
+- Complaint combinations in dimension: 1,115
+- Fact rows: 50,000
+- Unmatched fact rows: 0
