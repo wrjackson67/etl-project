@@ -31,4 +31,26 @@ This project will ingest raw NYC 311 service request data, load it into PostgreS
 
 ## Status
 
-Project scaffold created. Next step: download a manageable NYC 311 CSV sample and build the bronze load.
+Project scaffold created. A 50,000-row working sample is expected at:
+
+```text
+data/raw/nyc_311_sample.csv
+```
+
+The raw sample is ignored by Git so large data files do not get pushed.
+
+## How to Run the Bronze Load
+
+1. Create a PostgreSQL database named `nyc_311`.
+2. Copy `.env.example` to `.env` and update the database credentials.
+3. Install Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Load the CSV into the bronze table:
+
+```bash
+python src/extract_load_raw.py --csv data/raw/nyc_311_sample.csv --truncate
+```
