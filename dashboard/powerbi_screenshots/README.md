@@ -1,6 +1,6 @@
 Power BI Screenshots
 
-Save exported dashboard screenshots in this folder.
+This folder contains dashboard screenshots from the NYC 311 operations analytics report.
 
 Current screenshots include executive overview and complaint analysis.
 
@@ -8,6 +8,4 @@ Executive overview shows total requests, closed requests, open requests, median 
 
 Complaint analysis shows median close time, complaint type count, total requests, largest complaint volume, slowest complaint types by median close time, and top complaint types by request volume.
 
-Expected future screenshots include borough operations, agency performance, and data quality.
-
-The Power BI file itself is ignored by Git because it can become large. Commit screenshots instead so reviewers can see the dashboard without opening Power BI.
+The Power BI file is kept local because it can become large. The committed screenshots provide a reviewer friendly view of the finished dashboard pages.

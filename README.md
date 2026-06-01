@@ -2,11 +2,11 @@ NYC 311 Data Engineering Pipeline
 
 Project Overview
 
-This project is a portfolio scale data engineering pipeline for NYC 311 service request data. It loads raw data into PostgreSQL, cleans and validates the records, creates reporting tables, and prepares the results for a Power BI dashboard.
+This project is a portfolio scale data engineering pipeline for NYC 311 service request data. It loads raw data into PostgreSQL, cleans and validates the records, creates dimensional and reporting tables, and presents dashboard results in Power BI.
 
 Business Problem
 
-NYC 311 service request data is large, messy, and difficult to use directly for reporting. A city operations team needs a repeatable process that turns raw records into clean tables for agency performance, borough trends, complaint volume, closure time, and data quality.
+NYC 311 service request data is large, messy, and difficult to use directly for reporting. A city operations team benefits from a repeatable process that turns raw operational records into clean tables for agency performance, borough trends, complaint volume, closure time, and data quality.
 
 Tools Used
 
@@ -16,7 +16,7 @@ Data Source
 
 The project uses public NYC 311 service request data. The working sample contains 50,000 records from December 2019. The raw data file is stored locally and is not pushed to GitHub.
 
-Pipeline Architecture
+What Was Built
 
 The bronze layer stores raw imported records.
 
@@ -26,27 +26,23 @@ The dimensional layer stores agency, location, and complaint lookup tables plus 
 
 The gold layer stores final reporting tables for monthly borough summaries, agency performance, complaint trends, and data quality reporting.
 
-How To Run The Project
+The validation script refreshes the data quality report.
 
-Create a PostgreSQL database named nyc 311.
+The pipeline runner rebuilds the local pipeline in the correct order.
 
-Copy the example environment file to a local environment file and add the database credentials.
+The Power BI dashboard provides executive overview and complaint analysis screenshots.
 
-Install the Python requirements.
+Repository Contents
 
-Run the bronze load script to load the raw CSV sample.
+The sql folder contains the database schema and transformations.
 
-Run the silver SQL script to clean the data.
+The src folder contains the Python ingestion, validation, and pipeline runner scripts.
 
-Run the dimension and fact SQL scripts.
+The docs folder contains architecture notes, data dictionary, data quality summary, dashboard summary, and project summary.
 
-Run the gold SQL script.
+The dashboard folder contains Power BI dashboard screenshots.
 
-Run the validation script.
-
-The full pipeline runner can rebuild the full local pipeline with one command after the local environment is configured.
-
-Current Validation Snapshot
+Project Results
 
 Bronze rows, 50,000.
 
@@ -72,7 +68,7 @@ Missing closed dates, 833.
 
 Data quality score, 98.67.
 
-Initial Business Findings
+Business Findings
 
 The top complaint type is Noise Residential, with 6,528 requests.
 
@@ -84,12 +80,12 @@ The highest average closure time belongs to the Department of Health and Mental 
 
 Dashboard Summary
 
-Power BI should connect to the gold reporting tables in PostgreSQL. The dashboard should include an executive overview, borough operations, agency performance, complaint trends, and data quality page. Screenshots should be saved in the dashboard screenshot folder.
+The dashboard includes an executive overview page and a complaint analysis page. The screenshots show request volume, open and closed requests, agency performance, borough volume, complaint volume, close time, and data quality metrics.
 
 Future Improvements
 
-Load a broader date range so monthly trends and seasonal patterns are more meaningful.
+A broader date range would make monthly trends and seasonal patterns more meaningful.
 
-Add dashboard screenshots after the Power BI report is built.
+Additional dashboard pages could expand borough operations, agency performance, and data quality analysis.
 
-Add optional scheduling after the local pipeline is complete.
+Optional scheduling could be added after the local pipeline is complete.
