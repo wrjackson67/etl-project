@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Environment and local config
+.env
+.env.*
+!.env.example
+
+# Data files
+data/raw/*
+data/sample/*
+!data/raw/.gitkeep
+!data/sample/.gitkeep
+
+# Logs and generated outputs
+*.log
+*.tmp
+
+# Power BI local files can be large; keep screenshots instead.
+*.pbix
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
