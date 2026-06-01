@@ -28,6 +28,7 @@ This project will ingest raw NYC 311 service request data, load it into PostgreS
 - Data dictionary and quality rules
 - Power BI dashboard screenshots
 - Project summary with findings and recommendations
+- Power BI dashboard build guide
 
 ## Status
 
@@ -123,3 +124,17 @@ The initial 50,000-row sample produced:
 - Highest average closure time: Department of Health and Mental Hygiene, at 12,070.94 hours
 - Records with missing/unspecified borough: 330
 - Records with invalid close dates: 337
+
+## Dashboard
+
+Power BI should connect to the PostgreSQL `gold_*` tables. The dashboard build guide is available at:
+
+```text
+docs/powerbi_dashboard_guide.md
+```
+
+Export dashboard screenshots into:
+
+```text
+dashboard/powerbi_screenshots/
+```
