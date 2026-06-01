@@ -1,101 +1,37 @@
-# Power BI Dashboard Guide
+Power BI Dashboard Guide
 
-## Data Connection
+Data Connection
 
-Connect Power BI Desktop to PostgreSQL:
+Connect Power BI Desktop to the local PostgreSQL database named nyc 311.
 
-- Server: `localhost`
-- Database: `nyc_311`
-- Data connectivity mode: Import
+Load the gold reporting tables for monthly borough summary, agency performance, complaint trends, and data quality report.
 
-Load these tables:
+Executive Overview Page
 
-- `gold_monthly_borough_summary`
-- `gold_agency_performance`
-- `gold_complaint_trends`
-- `gold_data_quality_report`
+This page should show total service requests, closed requests, open requests, average close time, top complaint types, top agencies, and request count by month.
 
-Optional detail tables:
+Borough Operations Page
 
-- `fact_service_requests`
-- `dim_agency`
-- `dim_location`
-- `dim_complaint`
+This page should show requests by borough, average close time by borough, open requests by borough, and percent closed by borough.
 
-## Page 1: Executive Overview
+Agency Performance Page
 
-Suggested visuals:
+This page should show request volume by agency, average close time by agency, open request count by agency, and closure rate by agency.
 
-- KPI card: total service requests
-- KPI card: closed requests
-- KPI card: open requests
-- KPI card: average close time
-- Bar chart: top complaint types by request count
-- Bar chart: top agencies by request count
-- Column chart: request count by month
+Complaint Trends Page
 
-Recommended tables:
+This page should show complaint volume by type and month. The current sample only contains December 2019, so this page will become more useful after loading more months.
 
-- `gold_complaint_trends`
-- `gold_agency_performance`
-- `gold_monthly_borough_summary`
+Data Quality Page
 
-## Page 2: Borough Operations
+This page should show data quality score, records with quality issues, duplicate id count, missing borough count, missing zip count, missing closed date count, and invalid date count.
 
-Suggested visuals:
+Screenshot Checklist
 
-- Bar chart: requests by borough
-- Bar chart: average close time by borough
-- Stacked bar chart: closed vs open requests by borough
-- Table: borough, request count, closed count, open request count, percent closed
+Save screenshots for executive overview, borough operations, agency performance, complaint trends, and data quality.
 
-Recommended table:
+Save the images in the dashboard screenshot folder so reviewers can see the dashboard without opening Power BI.
 
-- `gold_monthly_borough_summary`
+Notes
 
-## Page 3: Agency Performance
-
-Suggested visuals:
-
-- Bar chart: request volume by agency
-- Bar chart: average close time by agency
-- Bar chart: open request count by agency
-- Table: agency, request count, closed count, percent closed, median close time
-
-Recommended table:
-
-- `gold_agency_performance`
-
-## Page 4: Data Quality
-
-Suggested visuals:
-
-- KPI card: data quality score
-- KPI card: records with quality issues
-- KPI card: invalid date count
-- KPI card: missing borough count
-- KPI card: duplicate ID count
-- Bar chart: missing zip, missing closed date, missing borough, invalid date counts
-
-Recommended table:
-
-- `gold_data_quality_report`
-
-## Screenshot Checklist
-
-Save dashboard screenshots in:
-
-```text
-dashboard/powerbi_screenshots/
-```
-
-Recommended filenames:
-
-- `executive_overview.png`
-- `borough_operations.png`
-- `agency_performance.png`
-- `data_quality.png`
-
-## Notes
-
-The current working sample contains December 2019 records only, so the dashboard should describe trend views as sample-limited until a broader date range is loaded.
+The current sample is useful for proving the pipeline and dashboard structure. A broader sample will make trend charts stronger.

@@ -1,140 +1,95 @@
-# NYC 311 Data Engineering Pipeline
+NYC 311 Data Engineering Pipeline
 
-Portfolio-scale data engineering project for NYC 311 operations analytics using a bronze/silver/gold workflow.
+Project Overview
 
-## Project Overview
+This project is a portfolio scale data engineering pipeline for NYC 311 service request data. It loads raw data into PostgreSQL, cleans and validates the records, creates reporting tables, and prepares the results for a Power BI dashboard.
 
-This project will ingest raw NYC 311 service request data, load it into PostgreSQL, clean and validate it, model it into analytics-ready tables, and support Power BI dashboard reporting.
+Business Problem
 
-## Planned Stack
+NYC 311 service request data is large, messy, and difficult to use directly for reporting. A city operations team needs a repeatable process that turns raw records into clean tables for agency performance, borough trends, complaint volume, closure time, and data quality.
 
-- Python
-- pandas
-- PostgreSQL
-- SQL
-- Power BI
+Tools Used
 
-## Pipeline Architecture
+Python, pandas, PostgreSQL, SQL, Power BI, Git, and GitHub.
 
-- Bronze: raw imported 311 records
-- Silver: cleaned and standardized records with typed dates, close-time metrics, normalized borough/status values, duplicate flags, and data quality issue flags
-- Gold: monthly summaries, agency performance, complaint trends, and data quality metrics
+Data Source
 
-## Initial Deliverables
+The project uses public NYC 311 service request data. The working sample contains 50,000 records from December 2019. The raw data file is stored locally and is not pushed to GitHub.
 
-- Raw 311 sample dataset
-- Python ingestion and validation scripts
-- SQL schema and transformation files
-- Data dictionary and quality rules
-- Power BI dashboard screenshots
-- Project summary with findings and recommendations
-- Power BI dashboard build guide
+Pipeline Architecture
 
-## Status
+The bronze layer stores raw imported records.
 
-Project scaffold created. Bronze ingestion, silver cleaning, dimensions, fact table, and gold reporting tables are implemented. A 50,000-row working sample is expected at:
+The silver layer stores cleaned records with typed dates, standard borough values, standard status values, close time, open request flags, and data quality flags.
 
-```text
-data/raw/nyc_311_sample.csv
-```
+The dimensional layer stores agency, location, and complaint lookup tables plus one service request fact table.
 
-The raw sample is ignored by Git so large data files do not get pushed.
+The gold layer stores final reporting tables for monthly borough summaries, agency performance, complaint trends, and data quality reporting.
 
-## How to Run the Bronze Load
+How To Run The Project
 
-1. Create a PostgreSQL database named `nyc_311`.
-2. Copy `.env.example` to `.env` and update the database credentials.
-3. Install Python dependencies:
+Create a PostgreSQL database named nyc 311.
 
-```bash
-pip install -r requirements.txt
-```
+Copy the example environment file to a local environment file and add the database credentials.
 
-4. Load the CSV into the bronze table:
+Install the Python requirements.
 
-```bash
-python src/extract_load_raw.py --csv data/raw/nyc_311_sample.csv --truncate
-```
+Run the bronze load script to load the raw CSV sample.
 
-5. Build the cleaned silver table:
+Run the silver SQL script to clean the data.
 
-```bash
-psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/02_clean_silver.sql
-```
+Run the dimension and fact SQL scripts.
 
-6. Build dimensions and fact table:
+Run the gold SQL script.
 
-```bash
-psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/03_create_dimensions.sql
-psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/04_create_fact_table.sql
-```
+Run the validation script.
 
-7. Build gold reporting tables:
+The full pipeline runner can rebuild the full local pipeline with one command after the local environment is configured.
 
-```bash
-psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/05_create_gold_tables.sql
-```
+Current Validation Snapshot
 
-8. Refresh the data quality report:
+Bronze rows, 50,000.
 
-```bash
-python src/validate_data.py
-```
+Silver rows, 50,000.
 
-Or run the full pipeline with one command:
+Fact rows, 50,000.
 
-```bash
-python src/run_pipeline.py --csv data/raw/nyc_311_sample.csv
-```
+Distinct request ids, 50,000.
 
-To rebuild silver, dimensions, fact, gold, and validation without reloading the CSV:
+Open requests, 1,190.
 
-```bash
-python src/run_pipeline.py --skip-bronze
-```
+Average close time, 641.48 hours.
 
-## Current Validation Snapshot
+Rows with data quality issues, 667.
 
-The initial 50,000-row sample produced:
+Invalid close dates, 337.
 
-- Bronze rows: 50,000
-- Silver rows: 50,000
-- Distinct request IDs: 50,000
-- Open requests: 1,190
-- Average close time: 641.48 hours
-- Rows with data quality issues: 667
-- Invalid close dates: 337
-- Missing/unspecified boroughs: 330
-- Missing zip codes: 1,092
-- Missing closed dates: 833
-- Agencies in dimension: 15
-- Locations in dimension: 400
-- Complaint combinations in dimension: 1,115
-- Fact rows: 50,000
-- Unmatched fact rows: 0
-- Monthly borough summary rows: 6
-- Agency performance rows: 15
-- Complaint trend rows: 150
-- Data quality score: 98.67
+Missing or unspecified boroughs, 330.
 
-## Initial Business Findings
+Missing zip codes, 1,092.
 
-- Top complaint type: Noise - Residential, with 6,528 requests
-- Highest-volume borough: Brooklyn, with 15,742 requests
-- Highest average closure time: Department of Health and Mental Hygiene, at 12,070.94 hours
-- Records with missing/unspecified borough: 330
-- Records with invalid close dates: 337
+Missing closed dates, 833.
 
-## Dashboard
+Data quality score, 98.67.
 
-Power BI should connect to the PostgreSQL `gold_*` tables. The dashboard build guide is available at:
+Initial Business Findings
 
-```text
-docs/powerbi_dashboard_guide.md
-```
+The top complaint type is Noise Residential, with 6,528 requests.
 
-Export dashboard screenshots into:
+The highest volume borough is Brooklyn, with 15,742 requests.
 
-```text
-dashboard/powerbi_screenshots/
-```
+The top agency by request volume is the New York City Police Department, with 18,582 requests.
+
+The highest average closure time belongs to the Department of Health and Mental Hygiene, at 12,070.94 hours.
+
+Dashboard Summary
+
+Power BI should connect to the gold reporting tables in PostgreSQL. The dashboard should include an executive overview, borough operations, agency performance, complaint trends, and data quality page. Screenshots should be saved in the dashboard screenshot folder.
+
+Future Improvements
+
+Load a broader date range so monthly trends and seasonal patterns are more meaningful.
+
+Add dashboard screenshots after the Power BI report is built.
+
+Add optional scheduling after the local pipeline is complete.

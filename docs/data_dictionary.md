@@ -1,54 +1,65 @@
-# Data Dictionary
+Data Dictionary
 
-This dictionary documents the main final fields used in the dimensional and gold reporting layers.
+This document explains the main final fields used by the reporting tables.
 
-## fact_service_requests
+Service Request Fact Table
 
-| Field name | Source field | Definition | Data type | Required | Validation rule | Example |
-|---|---|---|---|---|---|---|
-| request_id | Unique Key | NYC 311 service request identifier | text | yes | Must not be null; should be unique | 45285347 |
-| created_at | Created Date | Timestamp when the request was created | timestamp | yes | Must parse into a valid timestamp | 2019-12-31 12:59:54 |
-| closed_at | Closed Date | Timestamp when the request was closed | timestamp | no | Cannot be earlier than created_at | 2020-01-01 10:15:00 |
-| created_month | Created Date | First day of the request creation month | date | yes | Derived from created_at | 2019-12-01 |
-| agency_id | Agency, Agency Name | Foreign key to dim_agency | integer | yes | Must match dim_agency | 1 |
-| location_id | Borough, Incident Zip, City | Foreign key to dim_location | integer | yes | Must match dim_location | 42 |
-| complaint_id | Complaint Type, Descriptor, Location Type | Foreign key to dim_complaint | integer | yes | Must match dim_complaint | 105 |
-| status | Status | Standardized request status | text | yes | Must be Closed, Open, or Other | Closed |
-| close_time_hours | Created Date, Closed Date | Hours between request creation and closure | numeric | no | Must be greater than or equal to 0 | 42.50 |
-| open_flag | Status | Indicates whether the request is still open | integer | yes | 1 for open, 0 for closed | 0 |
-| has_data_quality_issue | Validation flags | Indicates whether the record failed any major quality rule | boolean | yes | True when any major issue flag is true | false |
+Request id comes from Unique Key. It identifies each NYC 311 service request. It is required and should be unique. Example value, 45285347.
 
-## dim_agency
+Created at comes from Created Date. It is the timestamp when the request was created. It is required and must be a valid date and time.
 
-| Field name | Source field | Definition | Data type | Required | Validation rule | Example |
-|---|---|---|---|---|---|---|
-| agency_id | Generated | Surrogate key for agency records | integer | yes | Primary key | 1 |
-| agency | Agency | Agency code | text | yes | Missing values are set to Unknown | NYPD |
-| agency_name | Agency Name | Full agency name | text | yes | Missing values are set to Unknown | New York City Police Department |
+Closed at comes from Closed Date. It is the timestamp when the request was closed. It is optional because open requests may not have a close date. It cannot be earlier than the created date.
 
-## dim_location
+Created month comes from Created Date. It is the month used for reporting. Example value, December 2019.
 
-| Field name | Source field | Definition | Data type | Required | Validation rule | Example |
-|---|---|---|---|---|---|---|
-| location_id | Generated | Surrogate key for location records | integer | yes | Primary key | 42 |
-| borough | Borough | Standardized borough name | text | yes | Must be Manhattan, Brooklyn, Queens, Bronx, Staten Island, or Unspecified | Brooklyn |
-| incident_zip | Incident Zip | ZIP code for the service request | text | no | Missing values are set to Unknown in the dimension | 11201 |
-| city | City | Standardized city value | text | no | Missing values are set to Unknown in the dimension | Brooklyn |
+Agency id links each request to the agency table. It is required for reporting.
 
-## dim_complaint
+Location id links each request to the location table. It is required for reporting.
 
-| Field name | Source field | Definition | Data type | Required | Validation rule | Example |
-|---|---|---|---|---|---|---|
-| complaint_id | Generated | Surrogate key for complaint records | integer | yes | Primary key | 105 |
-| complaint_type | Problem (formerly Complaint Type) | Main complaint category | text | yes | Missing values are set to Unknown | Noise - Residential |
-| descriptor | Problem Detail (formerly Descriptor) | More specific complaint detail | text | no | Missing values are set to Unknown | Loud Music/Party |
-| location_type | Location Type | Type of location associated with complaint | text | no | Missing values are set to Unknown | Residential Building/House |
+Complaint id links each request to the complaint table. It is required for reporting.
 
-## Gold Reporting Tables
+Status comes from Status. It is standardized as Closed, Open, or Other.
 
-| Table | Grain | Purpose |
-|---|---|---|
-| gold_monthly_borough_summary | One row per month and borough | Tracks request volume, closure counts, open backlog, average/median close time, and percent closed |
-| gold_agency_performance | One row per agency | Tracks agency volume, closure rate, backlog, and close-time performance |
-| gold_complaint_trends | One row per month and complaint type | Tracks complaint volume, close time, and month-over-month request changes |
-| gold_data_quality_report | One row per validation run | Tracks missing fields, duplicate IDs, invalid dates, quality issue count, and quality score |
+Close time hours comes from Created Date and Closed Date. It measures how many hours passed between creation and closure. It is optional because open requests may not have a close date.
+
+Open flag comes from Status. It shows whether a request is open or closed. A value of 1 means open. A value of 0 means closed.
+
+Has data quality issue comes from validation rules. It shows whether the record failed a major quality check.
+
+Agency Table
+
+Agency id is a generated key for agency records.
+
+Agency comes from Agency. It stores the short agency code. Example value, NYPD.
+
+Agency name comes from Agency Name. It stores the full agency name. Example value, New York City Police Department.
+
+Location Table
+
+Location id is a generated key for location records.
+
+Borough comes from Borough. It is standardized as Manhattan, Brooklyn, Queens, Bronx, Staten Island, or Unspecified.
+
+Incident zip comes from Incident Zip. It stores the request zip code when present.
+
+City comes from City. It stores the city value after standard formatting.
+
+Complaint Table
+
+Complaint id is a generated key for complaint records.
+
+Complaint type comes from Problem formerly Complaint Type. It stores the main complaint category. Example value, Noise Residential.
+
+Descriptor comes from Problem Detail formerly Descriptor. It stores the more specific complaint detail.
+
+Location type comes from Location Type. It stores the type of place tied to the complaint.
+
+Gold Reporting Tables
+
+The monthly borough summary table tracks request count, closed count, open count, average close time, median close time, and percent closed by month and borough.
+
+The agency performance table tracks request count, closed count, open count, average close time, median close time, and percent closed by agency.
+
+The complaint trends table tracks request count and close time by month and complaint type.
+
+The data quality report table tracks duplicate ids, missing fields, invalid dates, records with quality issues, and the data quality score.
