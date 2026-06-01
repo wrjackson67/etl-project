@@ -74,6 +74,12 @@ psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/04_create_fact_table.sql
 psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/05_create_gold_tables.sql
 ```
 
+8. Refresh the data quality report:
+
+```bash
+python src/validate_data.py
+```
+
 ## Current Validation Snapshot
 
 The initial 50,000-row sample produced:
@@ -86,6 +92,8 @@ The initial 50,000-row sample produced:
 - Rows with data quality issues: 667
 - Invalid close dates: 337
 - Missing/unspecified boroughs: 330
+- Missing zip codes: 1,092
+- Missing closed dates: 833
 - Agencies in dimension: 15
 - Locations in dimension: 400
 - Complaint combinations in dimension: 1,115

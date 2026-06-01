@@ -10,3 +10,16 @@
 - Latitude and Longitude should be valid if present.
 - Status must use standardized values.
 - Close Time Hours must not be negative.
+
+## Automated Validation Output
+
+The `src/validate_data.py` script refreshes `gold_data_quality_report` from the cleaned silver table and prints:
+
+- Total records
+- Duplicate ID count
+- Missing borough count
+- Missing zip count
+- Missing closed date count
+- Invalid date count
+- Records with quality issues
+- Data quality score
