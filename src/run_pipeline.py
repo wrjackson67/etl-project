@@ -1,8 +1,4 @@
-"""Orchestrate the local NYC 311 pipeline.
-
-Usage:
-    python src/run_pipeline.py --csv data/raw/nyc_311_sample.csv
-"""
+"""Orchestrate the local NYC 311 pipeline."""
 
 from __future__ import annotations
 
@@ -44,10 +40,10 @@ def run_sql_steps() -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the full local NYC 311 pipeline.")
-    parser.add_argument("--csv", type=Path, default=DEFAULT_CSV_PATH, help="Path to the raw NYC 311 sample CSV.")
+    parser = argparse.ArgumentParser(description="Local NYC 311 pipeline orchestration.")
+    parser.add_argument("--csv", type=Path, default=DEFAULT_CSV_PATH, help="Raw NYC 311 sample CSV path.")
     parser.add_argument("--chunksize", type=int, default=10000, help="Rows to process per pandas chunk.")
-    parser.add_argument("--skip-bronze", action="store_true", help="Skip raw CSV loading and rebuild downstream tables only.")
+    parser.add_argument("--skip-bronze", action="store_true", help="Process downstream tables only.")
     parser.add_argument("--no-truncate", action="store_true", help="Do not truncate bronze before loading.")
     return parser.parse_args()
 

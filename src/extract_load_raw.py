@@ -1,8 +1,4 @@
-"""Load raw NYC 311 CSV data into the bronze table.
-
-Usage:
-    python src/extract_load_raw.py --csv data/raw/nyc_311_sample.csv --truncate
-"""
+"""Load raw NYC 311 CSV data into the bronze table."""
 
 from __future__ import annotations
 
@@ -128,8 +124,8 @@ def load_csv(csv_path: Path, chunksize: int, truncate: bool) -> int:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Load raw NYC 311 CSV data into PostgreSQL.")
-    parser.add_argument("--csv", type=Path, default=DEFAULT_CSV_PATH, help="Path to the NYC 311 CSV file.")
+    parser = argparse.ArgumentParser(description="NYC 311 bronze ingestion.")
+    parser.add_argument("--csv", type=Path, default=DEFAULT_CSV_PATH, help="NYC 311 CSV file path.")
     parser.add_argument("--chunksize", type=int, default=10000, help="Rows to process per pandas chunk.")
     parser.add_argument("--truncate", action="store_true", help="Truncate bronze table before loading.")
     return parser.parse_args()

@@ -1,8 +1,4 @@
-"""Run data quality checks for the NYC 311 pipeline.
-
-Usage:
-    python src/validate_data.py
-"""
+"""Refresh data quality checks for the NYC 311 pipeline."""
 
 from __future__ import annotations
 
