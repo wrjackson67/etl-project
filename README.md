@@ -80,6 +80,18 @@ psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/05_create_gold_tables.sq
 python src/validate_data.py
 ```
 
+Or run the full pipeline with one command:
+
+```bash
+python src/run_pipeline.py --csv data/raw/nyc_311_sample.csv
+```
+
+To rebuild silver, dimensions, fact, gold, and validation without reloading the CSV:
+
+```bash
+python src/run_pipeline.py --skip-bronze
+```
+
 ## Current Validation Snapshot
 
 The initial 50,000-row sample produced:

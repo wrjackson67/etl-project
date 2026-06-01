@@ -1,5 +1,6 @@
 -- Create agency, location, and complaint dimension tables.
 
+DROP TABLE IF EXISTS fact_service_requests;
 DROP TABLE IF EXISTS dim_agency;
 DROP TABLE IF EXISTS dim_location;
 DROP TABLE IF EXISTS dim_complaint;
