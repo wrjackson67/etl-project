@@ -17,7 +17,7 @@ This project will ingest raw NYC 311 service request data, load it into PostgreS
 ## Pipeline Architecture
 
 - Bronze: raw imported 311 records
-- Silver: cleaned and standardized records
+- Silver: cleaned and standardized records with typed dates, close-time metrics, normalized borough/status values, duplicate flags, and data quality issue flags
 - Gold: monthly summaries, agency performance, complaint trends, and data quality metrics
 
 ## Initial Deliverables
@@ -31,7 +31,7 @@ This project will ingest raw NYC 311 service request data, load it into PostgreS
 
 ## Status
 
-Project scaffold created. A 50,000-row working sample is expected at:
+Project scaffold created. Bronze ingestion and silver cleaning are implemented. A 50,000-row working sample is expected at:
 
 ```text
 data/raw/nyc_311_sample.csv
@@ -54,3 +54,22 @@ pip install -r requirements.txt
 ```bash
 python src/extract_load_raw.py --csv data/raw/nyc_311_sample.csv --truncate
 ```
+
+5. Build the cleaned silver table:
+
+```bash
+psql -h localhost -p 5432 -U postgres -d nyc_311 -f sql/02_clean_silver.sql
+```
+
+## Current Validation Snapshot
+
+The initial 50,000-row sample produced:
+
+- Bronze rows: 50,000
+- Silver rows: 50,000
+- Distinct request IDs: 50,000
+- Open requests: 1,190
+- Average close time: 641.48 hours
+- Rows with data quality issues: 667
+- Invalid close dates: 337
+- Missing/unspecified boroughs: 330
