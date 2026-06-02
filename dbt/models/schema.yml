@@ -1,0 +1,158 @@
+version: 2
+
+models:
+  - name: silver_311_requests_clean
+    description: Cleaned NYC 311 requests with typed fields, standardized values, duplicate markers, and data quality flags.
+    columns:
+      - name: request_id
+        tests:
+          - not_null:
+              config:
+                where: "duplicate_row_number = 1"
+      - name: created_at
+        tests:
+          - not_null:
+              config:
+                where: "duplicate_row_number = 1"
+      - name: borough
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Manhattan
+                  - Brooklyn
+                  - Queens
+                  - Bronx
+                  - Staten Island
+                  - Unspecified
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - Closed
+                  - Open
+                  - Other
+
+  - name: stg_311_requests
+    description: Deduplicated staging view used by marts and BI validation.
+    columns:
+      - name: request_id
+        tests:
+          - not_null
+          - unique
+      - name: created_at
+        tests:
+          - not_null
+
+  - name: dim_agency
+    description: Agency dimension generated from cleaned request records.
+    columns:
+      - name: agency_id
+        tests:
+          - not_null
+          - unique
+      - name: agency
+        tests:
+          - not_null
+
+  - name: dim_location
+    description: Location dimension generated from borough, zip, and city combinations.
+    columns:
+      - name: location_id
+        tests:
+          - not_null
+          - unique
+      - name: borough
+        tests:
+          - not_null
+
+  - name: dim_complaint
+    description: Complaint dimension generated from complaint type, descriptor, and location type.
+    columns:
+      - name: complaint_id
+        tests:
+          - not_null
+          - unique
+      - name: complaint_type
+        tests:
+          - not_null
+
+  - name: fact_service_requests
+    description: One row per accepted 311 service request with dimensional foreign keys.
+    columns:
+      - name: request_id
+        tests:
+          - not_null
+          - unique
+      - name: agency_id
+        tests:
+          - relationships:
+              arguments:
+                to: "{{ ref('dim_agency') }}"
+                field: agency_id
+      - name: location_id
+        tests:
+          - relationships:
+              arguments:
+                to: "{{ ref('dim_location') }}"
+                field: location_id
+      - name: complaint_id
+        tests:
+          - relationships:
+              arguments:
+                to: "{{ ref('dim_complaint') }}"
+                field: complaint_id
+
+  - name: gold_agency_performance
+    description: Gold table for agency-level service volume and closure performance.
+    columns:
+      - name: agency
+        tests:
+          - not_null
+      - name: request_count
+        tests:
+          - not_null
+
+  - name: gold_monthly_borough_summary
+    description: Gold table for monthly borough trend reporting.
+    columns:
+      - name: created_month
+        tests:
+          - not_null
+      - name: borough
+        tests:
+          - not_null
+
+  - name: gold_complaint_trends
+    description: Gold table for complaint trend analysis.
+    columns:
+      - name: complaint_type
+        tests:
+          - not_null
+
+  - name: gold_data_quality_report
+    description: Gold table summarizing record-level data quality checks.
+    columns:
+      - name: run_date
+        tests:
+          - not_null
+      - name: total_records
+        tests:
+          - not_null
+
+  - name: gold_pipeline_observability
+    description: Gold table for pipeline run status, load volume, reject volume, and duration monitoring.
+    columns:
+      - name: run_id
+        tests:
+          - not_null
+          - unique
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - running
+                  - success
+                  - failed

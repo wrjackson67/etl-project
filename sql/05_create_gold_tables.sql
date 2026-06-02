@@ -4,6 +4,7 @@ DROP TABLE IF EXISTS gold_monthly_borough_summary;
 DROP TABLE IF EXISTS gold_agency_performance;
 DROP TABLE IF EXISTS gold_complaint_trends;
 DROP TABLE IF EXISTS gold_data_quality_report;
+DROP TABLE IF EXISTS gold_pipeline_observability;
 
 CREATE TABLE gold_monthly_borough_summary AS
 SELECT
@@ -108,3 +109,26 @@ SELECT
         2
     ) AS data_quality_score
 FROM silver_311_requests_clean;
+
+CREATE TABLE gold_pipeline_observability AS
+SELECT
+    run.run_id,
+    run.pipeline_name,
+    run.status,
+    run.source_file,
+    run.run_started_at,
+    run.run_finished_at,
+    run.duration_seconds,
+    run.rows_extracted,
+    run.rows_loaded,
+    run.rows_rejected,
+    ROUND(
+        (run.rows_rejected::NUMERIC / NULLIF(run.rows_extracted, 0)) * 100,
+        2
+    ) AS rejected_record_rate,
+    run.last_loaded_request_id,
+    run.error_message
+FROM pipeline_run_log run;
+
+CREATE INDEX idx_gold_pipeline_observability_run_started_at
+ON gold_pipeline_observability (run_started_at);

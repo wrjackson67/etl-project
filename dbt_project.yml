@@ -1,0 +1,17 @@
+name: nyc_311_pipeline
+version: 1.0.0
+config-version: 2
+
+profile: nyc_311_pipeline
+
+model-paths:
+  - dbt/models
+
+models:
+  nyc_311_pipeline:
+    staging:
+      +materialized: table
+    dimensions:
+      +materialized: table
+    marts:
+      +materialized: table

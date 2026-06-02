@@ -18,6 +18,10 @@ data/sample/*
 # Logs and generated outputs
 *.log
 *.tmp
+target/
+dbt_packages/
+logs/
+dbt/.user.yml
 
 # Power BI local files can be large; keep screenshots instead.
 *.pbix

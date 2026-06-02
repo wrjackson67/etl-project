@@ -1,37 +1,53 @@
 Pipeline Architecture
 
-This project uses a bronze, silver, and gold structure to turn raw NYC 311 records into reporting tables.
+This project uses a production-style batch ELT design for NYC 311 service request data.
 
-Source Data
+Flow
 
-The source data is public NYC 311 service request data. The working sample contains 50,000 records from December 2019. The raw file is stored locally and is excluded from GitHub because large data files do not belong in the repository.
+```text
+Source CSV
+  -> Python incremental ingestion
+  -> bronze_311_requests
+  -> dbt run
+  -> silver_311_requests_clean
+  -> dbt dimensions and fact table
+  -> dbt gold reporting marts
+  -> dbt tests and Power BI reporting
+```
 
-Bronze Layer
+Operational Metadata
 
-The bronze layer stores raw imported records. It keeps the source values close to their original form. Dates, coordinates, and ids are loaded as text so the raw data is preserved before cleaning.
+Each run writes to `pipeline_run_log`. The table tracks run status, source file, start and finish timestamps, duration, extracted rows, loaded rows, rejected rows, last loaded request id, and failure messages.
 
-Silver Layer
+Records that should not enter bronze are written to `rejected_records`. Current hard-reject reasons include missing request ids, duplicate ids in the current chunk, and records already loaded during incremental runs.
 
-The silver layer cleans and standardizes the bronze data.
+Incremental Loading
 
-The silver process parses created and closed dates, creates a reporting month, standardizes borough names, standardizes status values, converts coordinates, calculates close time, creates an open request flag, and creates data quality flags.
-
-Dimensional Model
-
-The model includes an agency table, a location table, a complaint table, and a service request fact table.
-
-The fact table stores one row per service request. It links to the dimension tables through generated keys. This structure is ready for Power BI reporting.
-
-Gold Layer
-
-The gold layer contains reporting tables for monthly borough summaries, agency performance, complaint trends, and data quality reporting.
-
-These tables are the main tables for the Power BI dashboard.
+The default pipeline mode appends only records with request ids that are not already present in bronze. This keeps repeat runs from duplicating data. `--full-refresh` truncates bronze and rebuilds the warehouse from the source file.
 
 Orchestration
 
-The pipeline runner can rebuild the local pipeline in order. It loads bronze data, rebuilds silver, rebuilds dimensions and fact, rebuilds gold, and refreshes the validation report.
+`src/run_pipeline.py` executes the local pipeline in order:
 
-Current Output
+1. Create operational and bronze tables.
+2. Start a pipeline run log entry.
+3. Incrementally load bronze records.
+4. Run dbt models to rebuild silver, dimensions, fact, and gold marts.
+5. Run dbt tests unless skipped.
+6. Mark the run as success or failed.
 
-The current pipeline produces 50,000 fact rows, 15 agencies, 400 locations, 1,115 complaint combinations, and a data quality score of 98.67.
+The Airflow DAG in `dags/nyc_311_batch_elt.py` schedules the Python pipeline and dbt tests.
+
+Modeling Layers
+
+The bronze layer preserves raw source fields as text.
+
+The dbt silver model standardizes dates, boroughs, statuses, coordinates, close-time metrics, open flags, duplicate indicators, and quality flags.
+
+The dimensional layer contains agency, location, and complaint dimensions plus a service request fact table.
+
+The gold layer contains reporting tables for borough trends, agency performance, complaint trends, data quality, and pipeline observability.
+
+Testing
+
+dbt tests validate key expectations: unique request ids, non-null created dates, accepted borough and status values, dimension relationship integrity, and mart health.

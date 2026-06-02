@@ -1,4 +1,20 @@
--- Create base tables for the NYC 311 pipeline.
+-- Create base and operational tables for the NYC 311 pipeline.
+
+CREATE TABLE IF NOT EXISTS pipeline_run_log (
+    run_id BIGSERIAL PRIMARY KEY,
+    pipeline_name TEXT NOT NULL DEFAULT 'nyc_311_batch_elt',
+    status TEXT NOT NULL DEFAULT 'running',
+    source_file TEXT,
+    run_started_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    run_finished_at TIMESTAMP,
+    duration_seconds NUMERIC(12, 2),
+    last_loaded_request_id TEXT,
+    rows_extracted INTEGER NOT NULL DEFAULT 0,
+    rows_loaded INTEGER NOT NULL DEFAULT 0,
+    rows_rejected INTEGER NOT NULL DEFAULT 0,
+    error_message TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE IF NOT EXISTS bronze_311_requests (
     unique_key TEXT,
@@ -49,8 +65,24 @@ CREATE TABLE IF NOT EXISTS bronze_311_requests (
     loaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS rejected_records (
+    rejected_id BIGSERIAL PRIMARY KEY,
+    run_id BIGINT REFERENCES pipeline_run_log (run_id),
+    unique_key TEXT,
+    source_file TEXT,
+    rejection_reason TEXT NOT NULL,
+    raw_record JSONB,
+    rejected_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE INDEX IF NOT EXISTS idx_bronze_311_unique_key
 ON bronze_311_requests (unique_key);
 
 CREATE INDEX IF NOT EXISTS idx_bronze_311_created_date
 ON bronze_311_requests (created_date);
+
+CREATE INDEX IF NOT EXISTS idx_rejected_records_run_id
+ON rejected_records (run_id);
+
+CREATE INDEX IF NOT EXISTS idx_pipeline_run_log_started_at
+ON pipeline_run_log (run_started_at);

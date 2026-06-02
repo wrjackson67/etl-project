@@ -1,45 +1,51 @@
 Data Quality Rules
 
-Unique Key must not be missing.
+Hard Reject Rules
 
-Unique Key should not be duplicated.
+These records are written to `rejected_records` during ingestion and do not enter bronze:
 
-Created Date must not be missing.
+- Missing `unique_key`.
+- Duplicate `unique_key` within the current ingestion chunk.
+- `unique_key` already present in bronze during incremental runs.
 
-Closed Date cannot be earlier than Created Date.
+Silver Quality Flags
 
-Borough must be standardized as Manhattan, Brooklyn, Queens, Bronx, Staten Island, or Unspecified.
+These checks are retained as flags in `silver_311_requests_clean` so analysts can report on data quality without losing operational records:
 
-Agency must not be missing.
+- Request id is missing.
+- Created date is missing or cannot be parsed.
+- Closed date is earlier than created date.
+- Agency is missing.
+- Complaint type is missing.
+- Borough is missing or standardized to `Unspecified`.
+- Latitude is outside `-90` to `90` when present.
+- Longitude is outside `-180` to `180` when present.
+- Status is standardized to `Closed`, `Open`, or `Other`.
+- Close time is only calculated when closed date is valid and not earlier than created date.
 
-Complaint Type must not be missing.
+dbt Tests
 
-Latitude and Longitude should be valid when present.
+The dbt project adds automated checks for:
 
-Status must use a standard value.
-
-Close Time Hours must not be negative.
+- Unique and non-null request ids.
+- Non-null created timestamps.
+- Accepted borough values.
+- Accepted status values.
+- Referential integrity from fact rows to agency, location, and complaint dimensions.
+- Non-null mart fields used by reports.
+- Pipeline observability run ids and accepted status values.
 
 Automated Validation Output
 
-The validation script refreshes the data quality report from the cleaned silver table.
-
-The report includes total records, duplicate id count, missing borough count, missing zip count, missing closed date count, invalid date count, records with quality issues, and data quality score.
+The dbt model `gold_data_quality_report` summarizes the cleaned silver table. The validation script reads that dbt-built table and prints total records, duplicate id count, missing borough count, missing zip count, missing closed date count, invalid date count, records with quality issues, and data quality score.
 
 Current Results
 
-Total records, 50,000.
-
-Duplicate id count, 0.
-
-Missing borough count, 330.
-
-Missing zip count, 1,092.
-
-Missing closed date count, 833.
-
-Invalid date count, 337.
-
-Records with quality issues, 667.
-
-Data quality score, 98.67.
+- Total records: 50,000.
+- Duplicate id count: 0.
+- Missing borough count: 330.
+- Missing zip count: 1,092.
+- Missing closed date count: 833.
+- Invalid date count: 337.
+- Records with quality issues: 667.
+- Data quality score: 98.67.

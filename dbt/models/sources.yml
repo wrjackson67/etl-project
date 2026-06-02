@@ -1,0 +1,9 @@
+version: 2
+
+sources:
+  - name: public
+    schema: public
+    tables:
+      - name: bronze_311_requests
+      - name: pipeline_run_log
+      - name: rejected_records

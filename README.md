@@ -1,91 +1,137 @@
-NYC 311 Data Engineering Pipeline
+NYC 311 Production-Style ELT Pipeline
 
 Project Overview
 
-This project is a portfolio scale data engineering pipeline for NYC 311 service request data. It loads raw data into PostgreSQL, cleans and validates the records, creates dimensional and reporting tables, and presents dashboard results in Power BI.
+This is a portfolio-scale data engineering project that turns NYC 311 service request data into tested, analytics-ready tables. It demonstrates the skeleton of a modern batch ELT platform: Python ingestion, PostgreSQL storage, dbt-owned bronze/silver/gold modeling, incremental loading, rejected-record handling, pipeline run logging, Airflow orchestration, Docker Compose, CI, and Power BI reporting.
 
 Business Problem
 
-NYC 311 service request data is large, messy, and difficult to use directly for reporting. A city operations team benefits from a repeatable process that turns raw operational records into clean tables for agency performance, borough trends, complaint volume, closure time, and data quality.
+NYC 311 service request data is large, messy, and difficult to report from directly. A city operations team needs a repeatable pipeline that can ingest new records, validate data quality, model dimensions and facts, and publish reporting marts for agency performance, borough trends, complaint volume, closure time, and pipeline health.
 
-Tools Used
+Modern Data Stack
 
-Python, pandas, PostgreSQL, SQL, Power BI, Git, and GitHub.
+- Python and pandas for CSV ingestion.
+- PostgreSQL for local warehouse storage.
+- dbt for silver, dimension, fact, and gold transformations plus automated tests.
+- SQL scripts as a legacy fallback/reference path.
+- Airflow for scheduled orchestration.
+- Docker Compose for repeatable local setup.
+- GitHub Actions for basic CI.
+- Power BI for dashboard reporting.
 
-Data Source
+Architecture
 
-The project uses public NYC 311 service request data. The working sample contains 50,000 records from December 2019. The raw data file is stored locally and is not pushed to GitHub.
+```text
+NYC Open Data CSV
+      |
+      v
+Python incremental loader
+      |
+      +--> pipeline_run_log
+      +--> rejected_records
+      |
+      v
+bronze_311_requests
+      |
+      v
+dbt run
+      |
+      v
+silver_311_requests_clean
+      |
+      v
+dim_agency + dim_location + dim_complaint + fact_service_requests
+      |
+      v
+gold reporting marts + dbt tests + Power BI
+```
 
 What Was Built
 
-The bronze layer stores raw imported records.
+- Incremental ingestion that appends only new `unique_key` records by default.
+- Full-refresh mode for rebuilding bronze from scratch.
+- `pipeline_run_log` table with run status, start/end time, duration, row counts, rejected rows, last loaded request id, and failure messages.
+- `rejected_records` table for missing request ids, duplicate rows within a chunk, and already-loaded incremental records.
+- Bronze table that preserves raw source fields as text.
+- dbt silver model that parses dates, standardizes borough and status values, converts coordinates, calculates close time, and flags data quality issues.
+- dbt dimension and fact models for agency, location, complaint, and service request analysis.
+- dbt gold marts for monthly borough summaries, agency performance, complaint trends, data quality, and pipeline observability.
+- dbt tests for uniqueness, nulls, accepted values, relationships, and mart health.
+- Airflow DAG that runs the Python pipeline and dbt tests on a daily schedule.
+- Docker Compose stack for PostgreSQL, pipeline execution, and Airflow.
+- GitHub Actions workflow for Python compilation and dbt project parsing.
 
-The silver layer stores cleaned records with typed dates, standard borough values, standard status values, close time, open request flags, and data quality flags.
+Run Locally
 
-The dimensional layer stores agency, location, and complaint lookup tables plus one service request fact table.
+1. Put the local CSV at `data/raw/nyc_311_sample.csv`.
+2. Copy `.env.example` to `.env` and adjust database values if needed.
+3. Start PostgreSQL:
 
-The gold layer stores final reporting tables for monthly borough summaries, agency performance, complaint trends, and data quality reporting.
+```bash
+docker compose up -d postgres
+```
 
-The validation script refreshes the data quality report.
+4. Run the pipeline:
 
-The pipeline runner rebuilds the local pipeline in the correct order.
+```bash
+docker compose run --rm pipeline
+```
 
-The Power BI dashboard provides executive overview and complaint analysis screenshots.
+5. Run a full refresh when you want to rebuild bronze:
 
-Repository Contents
+```bash
+docker compose run --rm pipeline python src/run_pipeline.py --full-refresh
+```
 
-The sql folder contains the database schema and transformations.
+6. Run dbt tests:
 
-The src folder contains the Python ingestion, validation, and pipeline runner scripts.
+```bash
+DBT_PROFILES_DIR=dbt dbt test
+```
 
-The docs folder contains architecture notes, data dictionary, data quality summary, dashboard summary, and project summary.
+The runner uses dbt by default. Use the legacy SQL fallback only when dbt is unavailable:
 
-The dashboard folder contains Power BI dashboard screenshots.
+```bash
+python src/run_pipeline.py --transform-engine sql
+```
 
-Project Results
+7. Start Airflow:
 
-Bronze rows, 50,000.
+```bash
+docker compose up airflow
+```
 
-Silver rows, 50,000.
+The Airflow UI runs at `http://localhost:8080`.
 
-Fact rows, 50,000.
+Important Tables
 
-Distinct request ids, 50,000.
+- `bronze_311_requests`: raw ingested records.
+- `silver_311_requests_clean`: cleaned and standardized records with quality flags.
+- `dim_agency`, `dim_location`, `dim_complaint`: dimensional lookup tables.
+- `fact_service_requests`: one row per accepted service request.
+- `gold_monthly_borough_summary`: borough-level monthly reporting.
+- `gold_agency_performance`: agency-level performance reporting.
+- `gold_complaint_trends`: complaint trend reporting.
+- `gold_data_quality_report`: automated data quality summary.
+- `gold_pipeline_observability`: pipeline monitoring mart.
+- `pipeline_run_log`: operational run history.
+- `rejected_records`: records rejected during ingestion.
 
-Open requests, 1,190.
+Current Sample Results
 
-Average close time, 641.48 hours.
+- Bronze rows: 50,000.
+- Silver rows: 50,000.
+- Fact rows: 50,000.
+- Distinct request ids: 50,000.
+- Open requests: 1,190.
+- Average close time: 641.48 hours.
+- Rows with data quality issues: 667.
+- Invalid close dates: 337.
+- Missing or unspecified boroughs: 330.
+- Missing zip codes: 1,092.
+- Missing closed dates: 833.
+- Data quality score: 98.67.
 
-Rows with data quality issues, 667.
+Resume-Ready Summary
 
-Invalid close dates, 337.
-
-Missing or unspecified boroughs, 330.
-
-Missing zip codes, 1,092.
-
-Missing closed dates, 833.
-
-Data quality score, 98.67.
-
-Business Findings
-
-The top complaint type is Noise Residential, with 6,528 requests.
-
-The highest volume borough is Brooklyn, with 15,742 requests.
-
-The top agency by request volume is the New York City Police Department, with 18,582 requests.
-
-The highest average closure time belongs to the Department of Health and Mental Hygiene, at 12,070.94 hours.
-
-Dashboard Summary
-
-The dashboard includes an executive overview page and a complaint analysis page. The screenshots show request volume, open and closed requests, agency performance, borough volume, complaint volume, close time, and data quality metrics.
-
-Future Improvements
-
-A broader date range would make monthly trends and seasonal patterns more meaningful.
-
-Additional dashboard pages could expand borough operations, agency performance, and data quality analysis.
-
-Optional scheduling could be added after the local pipeline is complete.
+Built a production-style ELT pipeline using Python, Airflow, dbt, PostgreSQL, and Docker to ingest, validate, transform, and model NYC 311 service request data into analytics-ready fact and dimension tables. Implemented incremental loading, pipeline run logging, rejected-record handling, dbt-managed transformations, dbt data quality tests, and gold reporting marts for agency performance, borough trends, complaint volume, closure-time analysis, and pipeline observability.

@@ -4,7 +4,7 @@ Project Purpose
 
 This project was built to demonstrate an end to end data engineering workflow using public NYC 311 service request data. The goal was to move beyond simple spreadsheet analysis and build a repeatable pipeline that ingests raw operational data, stores it in PostgreSQL, cleans and validates it, models it into reporting tables, and supports business intelligence reporting in Power BI.
 
-The project shows practical experience with data ingestion, SQL transformation, data quality validation, dimensional modeling, reporting table design, pipeline orchestration, documentation, and dashboard communication.
+The project shows practical experience with data ingestion, incremental loading, SQL transformation, data quality validation, dimensional modeling, reporting table design, pipeline orchestration, dbt testing, Docker-based setup, CI, documentation, and dashboard communication.
 
 Core Technical Skills Demonstrated
 
@@ -12,11 +12,13 @@ Python Data Engineering
 
 The project uses Python to load a raw NYC 311 CSV sample into PostgreSQL. The ingestion script reads the data in chunks so the load process can handle larger files without requiring the entire file to fit in memory at once.
 
-This demonstrates practical Python skills for file handling, data loading, environment configuration, database connection management, and repeatable local pipeline execution.
+The ingestion process appends new request ids by default, supports full refreshes, logs row counts to `pipeline_run_log`, and writes hard rejects to `rejected_records`.
+
+This demonstrates practical Python skills for file handling, data loading, incremental processing, environment configuration, database connection management, error handling, and repeatable local pipeline execution.
 
 PostgreSQL And SQL Development
 
-The project uses PostgreSQL as the main database. SQL scripts create the bronze, silver, dimensional, fact, and gold reporting layers.
+The project uses PostgreSQL as the main database. dbt models create the silver, dimensional, fact, and gold reporting layers from the bronze table. Legacy SQL scripts remain in the repository as a fallback/reference path.
 
 This demonstrates the ability to design database tables, write transformation SQL, convert raw text fields into typed values, create indexes, use joins, aggregate data, calculate metrics, and prepare clean tables for dashboard users.
 
@@ -26,11 +28,11 @@ The project follows a bronze, silver, and gold structure.
 
 The bronze layer preserves raw imported records.
 
-The silver layer standardizes and validates records.
+The dbt silver model standardizes and validates records.
 
-The dimensional and fact layer creates a reporting model.
+dbt dimension and fact models create a reporting model.
 
-The gold layer creates final dashboard ready summary tables.
+dbt gold models create final dashboard-ready summary tables.
 
 This demonstrates understanding of layered data architecture and how raw operational data can be organized into cleaner, more useful analytics outputs.
 
@@ -43,6 +45,8 @@ This demonstrates the ability to turn messy operational fields into consistent r
 Data Quality Validation
 
 The project includes automated data quality checks for duplicate request ids, missing request ids, invalid created dates, invalid close dates, missing agencies, missing complaint types, missing boroughs, missing zip codes, missing closed dates, invalid latitude values, and invalid longitude values.
+
+The dbt project adds tests for unique request ids, non-null key reporting fields, accepted borough and status values, dimensional relationship integrity, and pipeline observability status values.
 
 The final data quality score for the current sample is 98.67.
 
@@ -66,9 +70,17 @@ This demonstrates the ability to prepare curated reporting outputs instead of ex
 
 Pipeline Orchestration
 
-The project includes a local pipeline runner that rebuilds the pipeline in order. It can load bronze data, rebuild silver data, rebuild dimensions and fact tables, rebuild gold reporting tables, and refresh the validation report.
+The project includes a local pipeline runner that rebuilds the pipeline in order. It can incrementally load bronze data, run dbt transformations, run dbt tests, read the validation report, and mark the run as success or failed.
+
+The repository also includes an Airflow DAG that schedules the Python pipeline and dbt tests.
 
 This demonstrates an understanding of pipeline order, repeatability, and automation.
+
+Docker And CI
+
+Docker Compose provides a repeatable local environment for PostgreSQL, the pipeline container, and Airflow. GitHub Actions provides basic CI by installing dependencies, compiling Python files, and parsing the dbt project.
+
+This demonstrates awareness of deployment readiness and automated quality gates.
 
 Business Intelligence And Dashboarding
 
@@ -99,6 +111,8 @@ The project created a service request fact table with 50,000 rows.
 The project created gold reporting tables for borough summaries, agency performance, complaint trends, and data quality.
 
 The project created an automated data quality report with a score of 98.67.
+
+The project created pipeline run logging, rejected-record handling, dbt tests, Docker Compose setup, Airflow orchestration, and CI.
 
 The project created Power BI screenshots that show the final reporting output.
 
@@ -156,11 +170,13 @@ Together, the two dashboard pages show both operational scale and operational fr
 
 Resume Ready Themes
 
-This project can support resume bullets about building an end to end data engineering pipeline with Python, SQL, PostgreSQL, and Power BI.
+This project can support resume bullets about building an end to end data engineering pipeline with Python, SQL, PostgreSQL, Airflow, dbt, Docker, CI, and Power BI.
 
 It can support bullets about designing bronze, silver, and gold data layers for operational analytics.
 
 It can support bullets about creating data quality checks for duplicates, missing fields, invalid dates, and reporting readiness.
+
+It can support bullets about implementing incremental loading, run logging, rejected-record handling, orchestration, and automated tests.
 
 It can support bullets about creating dimensional models and dashboard ready reporting tables.
 
@@ -176,4 +192,4 @@ The project is useful for roles such as Data Engineer, Junior Data Engineer, ETL
 
 Main Takeaway
 
-This project demonstrates that raw public data can be transformed into a clean, validated, modeled, and dashboard ready analytics product. It shows practical skills across Python, SQL, PostgreSQL, data quality, data modeling, reporting tables, documentation, and Power BI.
+This project demonstrates that raw public data can be transformed into a clean, validated, modeled, tested, and dashboard-ready analytics product. It shows practical skills across Python, SQL, PostgreSQL, incremental loading, dbt, Airflow, Docker, CI, data quality, data modeling, reporting tables, documentation, and Power BI.

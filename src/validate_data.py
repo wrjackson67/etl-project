@@ -1,4 +1,4 @@
-"""Refresh data quality checks for the NYC 311 pipeline."""
+"""Read data quality checks for the NYC 311 pipeline."""
 
 from __future__ import annotations
 
@@ -22,35 +22,8 @@ def build_connection_kwargs() -> dict[str, str]:
     }
 
 
-def refresh_quality_report(connection) -> dict[str, object]:
-    sql = """
-        DROP TABLE IF EXISTS gold_data_quality_report;
-
-        CREATE TABLE gold_data_quality_report AS
-        SELECT
-            CURRENT_DATE AS run_date,
-            COUNT(*) AS total_records,
-            COUNT(*) - COUNT(DISTINCT request_id) AS duplicate_id_count,
-            SUM(missing_request_id_flag::INT) AS missing_request_id_count,
-            SUM(invalid_created_date_flag::INT) AS invalid_created_date_count,
-            SUM(invalid_close_date_flag::INT) AS invalid_date_count,
-            SUM(missing_agency_flag::INT) AS missing_agency_count,
-            SUM(missing_complaint_type_flag::INT) AS missing_complaint_type_count,
-            SUM(missing_or_unspecified_borough_flag::INT) AS missing_borough_count,
-            SUM(CASE WHEN incident_zip IS NULL THEN 1 ELSE 0 END) AS missing_zip_count,
-            SUM(CASE WHEN closed_at IS NULL THEN 1 ELSE 0 END) AS missing_closed_date_count,
-            SUM(invalid_latitude_flag::INT) AS invalid_latitude_count,
-            SUM(invalid_longitude_flag::INT) AS invalid_longitude_count,
-            SUM(has_data_quality_issue::INT) AS records_with_quality_issues,
-            ROUND(
-                (1 - (SUM(has_data_quality_issue::INT)::NUMERIC / NULLIF(COUNT(*), 0))) * 100,
-                2
-            ) AS data_quality_score
-        FROM silver_311_requests_clean;
-    """
-
+def read_quality_report(connection) -> dict[str, object]:
     with connection.cursor() as cursor:
-        cursor.execute(sql)
         cursor.execute(
             """
             SELECT
@@ -83,7 +56,7 @@ def main() -> None:
     load_dotenv(PROJECT_ROOT / ".env")
     connection = psycopg2.connect(**build_connection_kwargs())
     try:
-        results = refresh_quality_report(connection)
+        results = read_quality_report(connection)
     finally:
         connection.close()
 
